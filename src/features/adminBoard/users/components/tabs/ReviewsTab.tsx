@@ -18,6 +18,8 @@ import {
   useAccessReviews,
   useDecideAccessReview,
 } from "@/features/adminBoard/users/hooks/useUsers";
+import { fallbackAccessReviews } from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 import type { AccessReview } from "@/features/adminBoard/users/types/users";
 
 const { reviewStatusMeta } = usersConfig;
@@ -26,7 +28,11 @@ export function ReviewsTab() {
   const reviewsQuery = useAccessReviews();
   const decide = useDecideAccessReview();
 
-  const reviews = reviewsQuery.data ?? [];
+  // data ? data : fallback from data/ folder
+  const reviews =
+    reviewsQuery.data && reviewsQuery.data.length > 0
+      ? reviewsQuery.data
+      : fallbackAccessReviews;
 
   const handleDecision = (
     review: AccessReview,
@@ -177,7 +183,7 @@ export function ReviewsTab() {
     );
   }
 
-  if (reviewsQuery.isError) {
+  if (reviewsQuery.isError && !env.useMockFallback) {
     return (
       <DashboardError
         message={reviewsQuery.error?.message}

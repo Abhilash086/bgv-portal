@@ -1,11 +1,32 @@
+import {
+  mapAccessReviews,
+  mapDepartments,
+  mapLoginSessions,
+  mapRoles,
+  mapUserList,
+} from "@/features/adminBoard/users/services/usersService";
 import type {
+  AccessReview,
   AccessReviewDto,
+  Department,
   DepartmentDto,
+  LoginSession,
   LoginSessionDto,
   Permission,
+  Role,
   RoleDto,
+  User,
   UserDto,
+  UsersOverview,
+  UserStatus,
 } from "@/features/adminBoard/users/types/users";
+
+/**
+ * Local fallback data for the Users, Roles & Permissions feature. When the API
+ * returns nothing (no backend yet, empty response, or an error), the page
+ * renders this sample data instead of empty tables. Swap or remove once the
+ * real API is wired.
+ */
 
 const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
 const ahead = (ms: number) => new Date(Date.now() + ms).toISOString();
@@ -468,3 +489,38 @@ export const mockAccessReviews: AccessReviewDto[] = [
     dueDate: ago(5 * DAY),
   },
 ];
+
+/* ------------------------------------------------------------------ *
+ * Mapped UI-model fallbacks the pages/tabs can use directly.
+ * ------------------------------------------------------------------ */
+
+const countByStatus = (status: UserStatus) =>
+  mockUsers.filter((u) => u.status === status).length;
+
+export const fallbackUsersOverview: UsersOverview = {
+  totalUsers: mockUsers.length,
+  activeUsers: countByStatus("active"),
+  inactiveUsers: countByStatus("inactive"),
+  invitedUsers: countByStatus("invited"),
+  roleCount: mockRoles.length,
+  departmentCount: mockDepartments.length,
+  activeSessions: mockLoginSessions.filter((s) => s.status === "active").length,
+  pendingReviews: mockAccessReviews.filter((r) => r.status === "pending").length,
+};
+
+export const fallbackUsers: User[] = mapUserList({
+  users: mockUsers,
+  total: mockUsers.length,
+}).users;
+
+export const fallbackRoles: Role[] = mapRoles(mockRoles);
+
+export const fallbackPermissions: Permission[] = mockPermissions;
+
+export const fallbackDepartments: Department[] = mapDepartments(mockDepartments);
+
+export const fallbackLoginSessions: LoginSession[] =
+  mapLoginSessions(mockLoginSessions);
+
+export const fallbackAccessReviews: AccessReview[] =
+  mapAccessReviews(mockAccessReviews);

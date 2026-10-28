@@ -13,6 +13,11 @@ import { RecentActivityPanel } from "@/features/adminBoard/dashboard/components/
 import { SlaBreachAlerts } from "@/features/adminBoard/dashboard/components/SlaBreachAlerts";
 import { DashboardSkeleton } from "@/features/adminBoard/dashboard/components/DashboardSkeleton";
 import { DashboardError } from "@/features/adminBoard/shared/components/DashboardError";
+import {
+  fallbackActivityFeed,
+  fallbackDashboardOverview,
+} from "@/features/adminBoard/dashboard/data/dashboard";
+import { env } from "@/config/env";
 import type { Kpi } from "@/features/adminBoard/dashboard/types/dashboard";
 
 export function DashboardPage() {
@@ -29,7 +34,9 @@ export function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  if (overview.isError || !overview.data) {
+  // While the mock-fallback flag is on, skip the error page and fall through
+  // to the fallback data below. Turn the flag off to surface real errors.
+  if (overview.isError && !env.useMockFallback) {
     return (
       <DashboardError
         message={overview.error?.message}
@@ -38,7 +45,8 @@ export function DashboardPage() {
     );
   }
 
-  const data = overview.data;
+  // overview ? overview : fallback from data/ folder
+  const data = overview.data ?? fallbackDashboardOverview;
   const kpiByKey = new Map<string, Kpi>(data.kpis.map((kpi) => [kpi.key, kpi]));
 
   return (
@@ -127,15 +135,20 @@ export function DashboardPage() {
 
       {/* Recent activity */}
       <section aria-label="Recent activity">
-        {activityFeed.isError ? (
+        {activityFeed.isError && !env.useMockFallback ? (
           <DashboardError
             message={activityFeed.error?.message}
             onRetry={() => activityFeed.refetch()}
           />
         ) : (
+          /* activity ? activity : fallback from data/ folder */
           <RecentActivityPanel
             config={activity}
-            items={activityFeed.data ?? []}
+            items={
+              activityFeed.data && activityFeed.data.length > 0
+                ? activityFeed.data
+                : fallbackActivityFeed
+            }
           />
         )}
       </section>

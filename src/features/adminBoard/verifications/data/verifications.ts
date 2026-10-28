@@ -1,7 +1,17 @@
+import { mapVerificationList } from "@/features/adminBoard/verifications/services/verificationService";
 import type {
+  Assignee,
   AssigneeDto,
   VerificationCaseDto,
+  VerificationList,
 } from "@/features/adminBoard/verifications/types/verification";
+
+/**
+ * Local fallback data for the verifications feature. When the API returns
+ * nothing (no backend yet, empty response, or an error), the page renders
+ * this sample data instead of an empty table. Swap or remove once the real
+ * API is wired.
+ */
 
 const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
 const ahead = (ms: number) => new Date(Date.now() + ms).toISOString();
@@ -137,3 +147,11 @@ export const mockVerificationCases: VerificationCaseDto[] = [
     progress: 0,
   },
 ];
+
+/** Mapped UI-model fallbacks the page can use directly. */
+export const fallbackVerificationList: VerificationList = mapVerificationList({
+  cases: mockVerificationCases,
+  total: mockVerificationCases.length,
+});
+
+export const fallbackAssignees: Assignee[] = mockAssignees;

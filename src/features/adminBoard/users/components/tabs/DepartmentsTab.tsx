@@ -9,12 +9,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardError } from "@/features/adminBoard/shared/components/DashboardError";
 import { CreateDepartmentDialog } from "@/features/adminBoard/users/components/CreateDepartmentDialog";
 import { useDepartments } from "@/features/adminBoard/users/hooks/useUsers";
+import { fallbackDepartments } from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 
 export function DepartmentsTab() {
   const departmentsQuery = useDepartments();
   const [createOpen, setCreateOpen] = useState(false);
 
-  const departments = departmentsQuery.data ?? [];
+  // data ? data : fallback from data/ folder
+  const departments =
+    departmentsQuery.data && departmentsQuery.data.length > 0
+      ? departmentsQuery.data
+      : fallbackDepartments;
 
   if (departmentsQuery.isLoading) {
     return (
@@ -30,7 +36,7 @@ export function DepartmentsTab() {
     );
   }
 
-  if (departmentsQuery.isError) {
+  if (departmentsQuery.isError && !env.useMockFallback) {
     return (
       <DashboardError
         message={departmentsQuery.error?.message}

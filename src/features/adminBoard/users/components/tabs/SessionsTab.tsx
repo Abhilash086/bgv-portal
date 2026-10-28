@@ -17,6 +17,8 @@ import {
   useLoginSessions,
   useRevokeSession,
 } from "@/features/adminBoard/users/hooks/useUsers";
+import { fallbackLoginSessions } from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 import type { LoginSession } from "@/features/adminBoard/users/types/users";
 
 const { sessionStatusMeta } = usersConfig;
@@ -29,7 +31,11 @@ export function SessionsTab() {
   const sessionsQuery = useLoginSessions();
   const revoke = useRevokeSession();
 
-  const sessions = sessionsQuery.data ?? [];
+  // data ? data : fallback from data/ folder
+  const sessions =
+    sessionsQuery.data && sessionsQuery.data.length > 0
+      ? sessionsQuery.data
+      : fallbackLoginSessions;
 
   const handleRevoke = (session: LoginSession) => {
     revoke.mutate(revokeSessionParams(session.id), {
@@ -177,7 +183,7 @@ export function SessionsTab() {
     );
   }
 
-  if (sessionsQuery.isError) {
+  if (sessionsQuery.isError && !env.useMockFallback) {
     return (
       <DashboardError
         message={sessionsQuery.error?.message}

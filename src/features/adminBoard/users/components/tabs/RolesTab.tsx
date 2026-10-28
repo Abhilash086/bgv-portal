@@ -16,6 +16,11 @@ import {
   usePermissions,
   useRoles,
 } from "@/features/adminBoard/users/hooks/useUsers";
+import {
+  fallbackPermissions,
+  fallbackRoles,
+} from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 import type { Role } from "@/features/adminBoard/users/types/users";
 
 export function RolesTab() {
@@ -26,8 +31,15 @@ export function RolesTab() {
   const [editRole, setEditRole] = useState<Role | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const roles = rolesQuery.data ?? [];
-  const permissions = permissionsQuery.data ?? [];
+  // data ? data : fallback from data/ folder
+  const roles =
+    rolesQuery.data && rolesQuery.data.length > 0
+      ? rolesQuery.data
+      : fallbackRoles;
+  const permissions =
+    permissionsQuery.data && permissionsQuery.data.length > 0
+      ? permissionsQuery.data
+      : fallbackPermissions;
 
   const handleDelete = (role: Role) => {
     deleteRole.mutate(deleteRoleParams(role.id), {
@@ -51,7 +63,7 @@ export function RolesTab() {
     );
   }
 
-  if (rolesQuery.isError) {
+  if (rolesQuery.isError && !env.useMockFallback) {
     return (
       <DashboardError
         message={rolesQuery.error?.message}

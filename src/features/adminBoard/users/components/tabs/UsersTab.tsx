@@ -13,6 +13,12 @@ import {
   useRoles,
   useUsers,
 } from "@/features/adminBoard/users/hooks/useUsers";
+import {
+  fallbackDepartments,
+  fallbackRoles,
+  fallbackUsers,
+} from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 import type { User } from "@/features/adminBoard/users/types/users";
 
 function TableSkeleton() {
@@ -42,9 +48,19 @@ export function UsersTab() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleUser, setRoleUser] = useState<User | null>(null);
 
-  const users = usersQuery.data?.users ?? [];
-  const roles = rolesQuery.data ?? [];
-  const departments = departmentsQuery.data ?? [];
+  // data ? data : fallback from data/ folder
+  const users =
+    usersQuery.data && usersQuery.data.users.length > 0
+      ? usersQuery.data.users
+      : fallbackUsers;
+  const roles =
+    rolesQuery.data && rolesQuery.data.length > 0
+      ? rolesQuery.data
+      : fallbackRoles;
+  const departments =
+    departmentsQuery.data && departmentsQuery.data.length > 0
+      ? departmentsQuery.data
+      : fallbackDepartments;
 
   return (
     <div className="space-y-4">
@@ -60,7 +76,7 @@ export function UsersTab() {
 
       {usersQuery.isLoading ? (
         <TableSkeleton />
-      ) : usersQuery.isError ? (
+      ) : usersQuery.isError && !env.useMockFallback ? (
         <DashboardError
           message={usersQuery.error?.message}
           onRetry={() => usersQuery.refetch()}

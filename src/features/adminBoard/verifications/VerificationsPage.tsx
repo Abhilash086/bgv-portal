@@ -10,6 +10,8 @@ import { VerificationTable } from "@/features/adminBoard/verifications/component
 import { NewVerificationDialog } from "@/features/adminBoard/verifications/components/NewVerificationDialog";
 import { BulkAssignDialog } from "@/features/adminBoard/verifications/components/BulkAssignDialog";
 import { DashboardError } from "@/features/adminBoard/shared/components/DashboardError";
+import { fallbackVerificationList } from "@/features/adminBoard/verifications/data/verifications";
+import { env } from "@/config/env";
 
 export function VerificationsPage() {
   const { pageHeader, newCaseLabel } = verificationConfig;
@@ -19,7 +21,13 @@ export function VerificationsPage() {
   const [assignOpen, setAssignOpen] = useState(false);
 
   const casesQuery = useVerificationCases();
-  const cases = casesQuery.data?.cases ?? [];
+
+  // cases ? cases : fallback from data/ folder — the table never renders empty
+  // just because the API returned nothing (empty response or error).
+  const cases =
+    casesQuery.data && casesQuery.data.cases.length > 0
+      ? casesQuery.data.cases
+      : fallbackVerificationList.cases;
 
   const clearSelection = () => setSelectedIds(new Set());
 
@@ -88,7 +96,7 @@ export function VerificationsPage() {
             ))}
           </div>
         </Card>
-      ) : casesQuery.isError ? (
+      ) : casesQuery.isError && !env.useMockFallback ? (
         <DashboardError
           message={casesQuery.error?.message}
           onRetry={() => casesQuery.refetch()}

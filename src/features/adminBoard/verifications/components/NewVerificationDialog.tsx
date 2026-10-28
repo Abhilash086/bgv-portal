@@ -20,6 +20,7 @@ import {
   useAssignees,
   useCreateVerification,
 } from "@/features/adminBoard/verifications/hooks/useVerifications";
+import { fallbackAssignees } from "@/features/adminBoard/verifications/data/verifications";
 import type { VerificationPriority } from "@/features/adminBoard/verifications/types/verification";
 
 const priorities: VerificationPriority[] = ["low", "medium", "high", "urgent"];
@@ -37,6 +38,12 @@ export function NewVerificationDialog({
 }: NewVerificationDialogProps) {
   const assignees = useAssignees();
   const createMutation = useCreateVerification();
+
+  // assignees ? assignees : fallback from data/ folder
+  const assigneeList =
+    assignees.data && assignees.data.length > 0
+      ? assignees.data
+      : fallbackAssignees;
 
   const [candidateName, setCandidateName] = useState("");
   const [candidateEmail, setCandidateEmail] = useState("");
@@ -146,7 +153,7 @@ export function NewVerificationDialog({
             onChange={setAssigneeId}
             options={[
               { label: "Unassigned", value: UNASSIGNED },
-              ...(assignees.data ?? []).map((assignee) => ({
+              ...assigneeList.map((assignee) => ({
                 label: assignee.name,
                 value: assignee.id,
               })),

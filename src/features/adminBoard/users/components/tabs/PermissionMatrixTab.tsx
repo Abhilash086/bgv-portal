@@ -9,6 +9,11 @@ import {
   usePermissions,
   useRoles,
 } from "@/features/adminBoard/users/hooks/useUsers";
+import {
+  fallbackPermissions,
+  fallbackRoles,
+} from "@/features/adminBoard/users/data/users";
+import { env } from "@/config/env";
 import type { Permission } from "@/features/adminBoard/users/types/users";
 
 function groupByModule(permissions: Permission[]) {
@@ -25,9 +30,19 @@ export function PermissionMatrixTab() {
   const rolesQuery = useRoles();
   const permissionsQuery = usePermissions();
 
-  const roles = useMemo(() => rolesQuery.data ?? [], [rolesQuery.data]);
+  // data ? data : fallback from data/ folder
+  const roles = useMemo(
+    () =>
+      rolesQuery.data && rolesQuery.data.length > 0
+        ? rolesQuery.data
+        : fallbackRoles,
+    [rolesQuery.data],
+  );
   const permissions = useMemo(
-    () => permissionsQuery.data ?? [],
+    () =>
+      permissionsQuery.data && permissionsQuery.data.length > 0
+        ? permissionsQuery.data
+        : fallbackPermissions,
     [permissionsQuery.data],
   );
   const groups = useMemo(() => groupByModule(permissions), [permissions]);
@@ -51,7 +66,7 @@ export function PermissionMatrixTab() {
     );
   }
 
-  if (rolesQuery.isError || permissionsQuery.isError) {
+  if ((rolesQuery.isError || permissionsQuery.isError) && !env.useMockFallback) {
     return (
       <DashboardError
         message={rolesQuery.error?.message ?? permissionsQuery.error?.message}

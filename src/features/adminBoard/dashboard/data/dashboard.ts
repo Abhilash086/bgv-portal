@@ -1,7 +1,23 @@
+import {
+  mapActivityFeed,
+  mapDashboardOverview,
+} from "@/features/adminBoard/dashboard/services/dashboardService";
 import type {
   ActivityFeedDto,
+  ActivityItem,
+  DashboardOverview,
   DashboardOverviewDto,
 } from "@/features/adminBoard/dashboard/types/dashboard";
+
+/**
+ * Local fallback data for the dashboard. When the API returns nothing (no
+ * backend yet, empty response, or an error), the page renders this sample
+ * data instead of a blank screen. Swap or remove once the real API is wired.
+ *
+ * `mockDashboardOverview` / `mockActivityFeed` are the raw DTO shapes; the
+ * `fallbackDashboardOverview` / `fallbackActivityFeed` exports are the mapped
+ * UI models the page consumes directly.
+ */
 
 /** Minutes/hours/days ago helper for believable relative timestamps. */
 const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
@@ -151,3 +167,10 @@ export const mockActivityFeed: ActivityFeedDto = {
     },
   ],
 };
+
+/** Mapped UI-model fallbacks the page can use directly. */
+export const fallbackDashboardOverview: DashboardOverview =
+  mapDashboardOverview(mockDashboardOverview);
+
+export const fallbackActivityFeed: ActivityItem[] =
+  mapActivityFeed(mockActivityFeed);

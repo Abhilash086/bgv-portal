@@ -17,6 +17,7 @@ import {
   useAssignees,
   useBulkAssign,
 } from "@/features/adminBoard/verifications/hooks/useVerifications";
+import { fallbackAssignees } from "@/features/adminBoard/verifications/data/verifications";
 
 type BulkAssignDialogProps = {
   open: boolean;
@@ -35,6 +36,12 @@ export function BulkAssignDialog({
   const bulkAssign = useBulkAssign();
   const [assigneeId, setAssigneeId] = useState<string>("");
 
+  // assignees ? assignees : fallback from data/ folder
+  const assigneeList =
+    assignees.data && assignees.data.length > 0
+      ? assignees.data
+      : fallbackAssignees;
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -45,8 +52,7 @@ export function BulkAssignDialog({
       {
         onSuccess: () => {
           const name =
-            assignees.data?.find((a) => a.id === assigneeId)?.name ??
-            "assignee";
+            assigneeList.find((a) => a.id === assigneeId)?.name ?? "assignee";
           toast.success(
             `Assigned ${caseIds.length} case${caseIds.length === 1 ? "" : "s"} to ${name}`,
           );
@@ -78,7 +84,7 @@ export function BulkAssignDialog({
             placeholder="Select a team member"
             value={assigneeId}
             onChange={setAssigneeId}
-            options={(assignees.data ?? []).map((assignee) => ({
+            options={assigneeList.map((assignee) => ({
               label: assignee.name,
               value: assignee.id,
             }))}

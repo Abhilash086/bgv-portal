@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { resolveIcon } from "@/features/adminBoard/shared/config/icons";
 import { usersConfig } from "@/features/adminBoard/users/config/users.config";
 import { useUsersOverview } from "@/features/adminBoard/users/hooks/useUsers";
+import { fallbackUsersOverview } from "@/features/adminBoard/users/data/users";
 import { OverviewStats } from "@/features/adminBoard/users/components/OverviewStats";
 import { UsersTab } from "@/features/adminBoard/users/components/tabs/UsersTab";
 import { RolesTab } from "@/features/adminBoard/users/components/tabs/RolesTab";
@@ -56,9 +57,9 @@ export function UsersPage() {
         </p>
       </section>
 
-      {/* Summary KPIs */}
+      {/* Summary KPIs — overview ? overview : fallback from data/ folder */}
       <OverviewStats
-        overview={overviewQuery.data}
+        overview={overviewQuery.data ?? fallbackUsersOverview}
         isLoading={overviewQuery.isLoading}
       />
 

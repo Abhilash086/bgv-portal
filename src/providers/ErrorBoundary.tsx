@@ -3,6 +3,13 @@ import ErrorSvg from "@/assets/error.svg";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
+  /**
+   * When this value changes, the boundary clears its error state and retries
+   * rendering its children. Pass the current route (e.g. `location.pathname`)
+   * so navigating away from a broken page automatically recovers instead of
+   * leaving the fallback stuck on screen.
+   */
+  resetKey?: unknown;
 }
 
 interface ErrorBoundaryState {
@@ -29,6 +36,18 @@ export class ErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Application Error:", error);
     console.error("Component Stack:", errorInfo.componentStack);
+  }
+
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    // Recover when the reset key changes (e.g. the user navigated to another
+    // route). Without this, hasError stays true forever and every subsequent
+    // page renders the fallback until a full reload.
+    if (
+      this.state.hasError &&
+      prevProps.resetKey !== this.props.resetKey
+    ) {
+      this.setState({ hasError: false, error: null });
+    }
   }
 
   handleGoHome = () => {
